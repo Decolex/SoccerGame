@@ -296,7 +296,7 @@ function verificarGol() {
 //=============================================================================================================================\\
 
 function verificarFimJogo() {
-    if (pontosEsquerda >= 1 || pontosDireita >= 1) {
+    if (pontosEsquerda >= 3 || pontosDireita >= 3) {
         jogoFinalizado = true;
         pontosEsquerda = 0;
         pontosDireita = 0;
