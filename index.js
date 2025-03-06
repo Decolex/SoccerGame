@@ -10,7 +10,7 @@ let raqtAltura = 250;
 let raqtComprimento = 40;
 let X = 30;
 let Y = 200;
-let X2 = 1405;
+let X2;
 let Y2= 200;
 
 let pontosDireita = 0;
@@ -18,22 +18,62 @@ let pontosEsquerda = 0;
 
 let jogoFinalizado = false;
 let botaoReiniciar;
+let botaoVoltar;
 
 //=============================================================================================================================\\
 
 function setup() {
-    createCanvas(1475,650);
+    createCanvas(windowWidth, windowHeight);
     
     bolaFutebol = loadImage('bola.png');
+    
     botaoReiniciar = createImg('seta.png'); 
-    botaoReiniciar.position(width / 2 - 80, height / 2 - 80); 
+    botaoReiniciar.position(width / 2 - 170, height / 2 - 70); 
     botaoReiniciar.size(180, 180);
-    botaoReiniciar.hide(); // Esconde o botão no início
-    botaoReiniciar.mousePressed(reiniciarJogo); // Chama a função para reiniciar o jogo
+    botaoReiniciar.hide();
+    botaoReiniciar.mousePressed(reiniciarJogo);
+
+    criarBotaoVoltar();
+
+    botaoVoltar = createImg('home.png');
+    botaoVoltar.position(width / 2 + 30, height / 2 - 60);  
+    botaoVoltar.size(150, 150);
+    botaoVoltar.hide();  
+    botaoVoltar.mousePressed(voltarMenu); 
+
+
+    X2 = width - 30 - raqtComprimento;
 }
+
 
 //=============================================================================================================================\\
 
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    X2 = width - 30 - raqtComprimento;
+
+   
+    xbolinha = width / 2;
+    ybolinha = height / 2;
+    diametro = width * 0.07;
+    raio = diametro / 2;
+    raqtAltura = height * 0.25;
+    raqtComprimento = width * 0.03;
+
+    botaoReiniciar.position(width / 2 - 30, height / 2 - 50);
+    botaoVoltar.position(width / 2 + 30, height / 2 + 50);
+
+    let placar = select('.placar');
+    if (placar) {
+        placar.position(width / 2 - 100, 20);
+    }
+}
+
+
+
+
+//=============================================================================================================================\\
  function draw() {
     background(color(50,120,50));
     desenharCampo();
@@ -60,8 +100,9 @@ function setup() {
 //=============================================================================================================================\\
 
 function desenharCampo(){
-    stroke(255); // Cor das linhas
-    strokeWeight(4); // Espessura das linhas
+    // Cor das linhas e espessura das linhas
+    stroke(255); 
+    strokeWeight(4); 
     
     // Linha central
     line(width / 2, 0, width / 2, height - 50);
@@ -78,17 +119,33 @@ function desenharCampo(){
 //=============================================================================================================================\\
 
 function desenharPlacar() {
-    fill(0); 
-    rect(0, height - 50, width, 50); 
+    let placar = select('.placar');
+    if (!placar) {
+        placar = createDiv('');
+        placar.class('placar');
+        document.body.appendChild(placar.elt);
+    }
+    
+    placar.html(`
+        <span class="azul">Azul: ${pontosEsquerda}</span>
+        <span class="vermelho">Vermelho: ${pontosDireita}</span>
+    `);
+}
 
-    fill(0); 
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    textFont('Montserrat');
+//=============================================================================================================================\\
 
-    // Desenha o placar
-    text(`Azul: ${pontosEsquerda}`, width / 4, height - 25);
-    text(`Vermelho: ${pontosDireita}`, (3 * width) / 4, height - 25);
+function criarBotaoVoltar() {
+    botaoVoltar = createImg('home.png');  
+    botaoVoltar.position(width / 2 + 30, height / 2 - 80);
+    botaoVoltar.size(130, 130);
+    botaoVoltar.hide(); 
+    botaoVoltar.mousePressed(voltarMenu);  
+}
+
+//=============================================================================================================================\\
+
+function voltarMenu() {
+    window.location.href = "menu.html"; 
 }
 
 //=============================================================================================================================\\
@@ -123,6 +180,7 @@ function colisaoBolinha() {
 function criarRaquete(X,Y,cor){
 
     fill(cor);
+
     //Parametros: X,Y,raqtComprimento, raqtAltura 
     rect(X,Y,raqtComprimento,raqtAltura);   
 }
@@ -132,6 +190,7 @@ function criarRaquete(X,Y,cor){
 function criarRaquete2(X,Y,cor){
 
     fill(cor);
+
     //Parametros: X,Y,raqtComprimento, raqtAltura 
     rect(X2,Y2,raqtComprimento,raqtAltura);   
 
@@ -140,10 +199,15 @@ function criarRaquete2(X,Y,cor){
 //=============================================================================================================================\\
 
 function colisaoRaquete(X, Y) {
-    if (xbolinha - raio < X + raqtComprimento && // Verifica se a bola está tocando a raquete na frente
-        xbolinha + raio > X && // Verifica se a bola passou um pouco da raquete
-        ybolinha + raio > Y && // Verifica se a bola está dentro da altura da raquete (abaixo do topo)
-        ybolinha - raio < Y + raqtAltura // Verifica se a bola está dentro da altura da raquete (acima da base)
+    if (
+        // Verifica se a bola está tocando a raquete na frente
+        xbolinha - raio < X + raqtComprimento && 
+        // Verifica se a bola passou um pouco da raquete
+        xbolinha + raio > X &&
+        // Verifica se a bola está dentro da altura da raquete (abaixo do topo)
+        ybolinha + raio > Y && 
+        // Verifica se a bola está dentro da altura da raquete (acima da base)
+        ybolinha - raio < Y + raqtAltura 
     ){
 
     // Ajusta para evitar que a bola entre na raquete    
@@ -232,13 +296,15 @@ function verificarGol() {
 //=============================================================================================================================\\
 
 function verificarFimJogo() {
-    if (pontosEsquerda >= 3 || pontosDireita >= 3) {
+    if (pontosEsquerda >= 1 || pontosDireita >= 1) {
         jogoFinalizado = true;
         pontosEsquerda = 0;
         pontosDireita = 0;
         botaoReiniciar.show();
+        botaoVoltar.show();
     }
 }
+
 
 //=============================================================================================================================\\
 
@@ -249,11 +315,11 @@ function reiniciarJogo() {
     ybolinha = height / 2;
     vxbolinha = 20;
     vybolinha = 20;
+   
     X = 30;
-    Y = 200;
-    X2 = 1405;
-    Y2= 200;
-
+    Y = height / 2 - raqtAltura / 2;
+    X2 = width - 30 - raqtComprimento;
+    Y2 = height / 2 - raqtAltura / 2;
 
     // Aleatorizar para onde a bola vai (esquerda ou direita)
     vxbolinha = 5 * (random() > 0.5 ? 1 : -1);
@@ -261,6 +327,7 @@ function reiniciarJogo() {
     
     // Escondendo o botão
     botaoReiniciar.hide();
+    botaoVoltar.hide();
     jogoFinalizado = false;
 }
 
